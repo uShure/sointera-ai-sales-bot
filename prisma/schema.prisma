@@ -1,0 +1,67 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Course {
+  id          String    @id @default(cuid())
+  name        String
+  url         String
+  format      String    // online, offline
+  price       Int
+  description String?
+  category    String?   // haircut, color, management, etc.
+  duration    String?
+  startDate   DateTime? // Дата начала курса
+  endDate     DateTime? // Дата окончания курса
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Customer {
+  id               String         @id @default(cuid())
+  telegramId       String         @unique
+  username         String?
+  firstName        String?
+  lastName         String?
+  phoneNumber      String?
+  classification   String?        // beginner, experienced, interested, etc.
+  stage            String?        // initial, considering, ready_to_buy, bought
+  lastInteraction  DateTime?
+  notes            String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  conversations    Conversation[]
+}
+
+model Conversation {
+  id         String   @id @default(cuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  messages   Message[]
+  status     String   @default("active") // active, transferred_to_manager, closed
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  role           String       // user, assistant, system
+  content        String
+  createdAt      DateTime     @default(now())
+}
+
+model ManagerRequest {
+  id         String   @id @default(cuid())
+  customerId String
+  reason     String
+  resolved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
