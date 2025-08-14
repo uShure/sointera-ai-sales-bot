@@ -1,0 +1,16 @@
+[Unit]
+Description=SOINTERA AI Sales Bot for Telegram
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/sointera-bot
+Environment="NODE_ENV=production"
+Environment="HEADLESS=true"
+ExecStart=/usr/local/bin/bun run start
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
