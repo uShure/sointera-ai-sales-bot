@@ -44,6 +44,10 @@ echo "📋 Копирование файлов проекта..."
 cp -r ./* /var/www/sointera-bot/
 cd /var/www/sointera-bot
 
+# Создаём базовый .env файл для установки
+echo "📝 Создание временного .env файла..."
+echo 'DATABASE_URL="file:./dev.db"' > .env
+
 # Устанавливаем зависимости
 echo "📦 Установка зависимостей проекта..."
 sudo -u www-data bun install
@@ -53,21 +57,18 @@ echo "🗄️ Инициализация базы данных..."
 sudo -u www-data bun run db:push
 sudo -u www-data bun run seed
 
-# Проверяем наличие .env.local
+# Создаём .env.local из примера если его нет
 if [ ! -f "/var/www/sointera-bot/.env.local" ]; then
+    echo "📝 Создание .env.local из примера..."
+    cp /var/www/sointera-bot/.env.example /var/www/sointera-bot/.env.local
+
     echo ""
-    echo "⚠️  ВАЖНО: Создайте файл /var/www/sointera-bot/.env.local"
-    echo "   с вашими ключами API и сессией Telegram"
+    echo "⚠️  ВАЖНО: Отредактируйте файл /var/www/sointera-bot/.env.local"
+    echo "   и добавьте ваш ключ OpenAI API"
     echo ""
-    echo "Пример содержимого:"
-    echo "----------------------------------------"
-    echo "OPENAI_API_KEY=ваш_ключ"
-    echo "TELEGRAM_API_ID=23238977"
-    echo "TELEGRAM_API_HASH=48bc98627708f323292cdfed426cb760"
-    echo "TELEGRAM_SESSION_STRING=строка_сессии"
-    echo "MANAGER_USERNAME=natalylini"
-    echo "HEADLESS=true"
-    echo "----------------------------------------"
+    echo "Команда для редактирования:"
+    echo "  nano /var/www/sointera-bot/.env.local"
+    echo ""
 fi
 
 # Устанавливаем systemd сервис
@@ -80,21 +81,24 @@ echo "✅ Установка завершена!"
 echo ""
 echo "📝 Дальнейшие шаги:"
 echo ""
-echo "1. Если нужно - получите сессию Telegram:"
+echo "1. Добавьте ваш OpenAI API ключ:"
+echo "   nano /var/www/sointera-bot/.env.local"
+echo ""
+echo "2. Получите сессию Telegram:"
 echo "   cd /var/www/sointera-bot"
 echo "   sudo -u www-data bun run start"
 echo "   (следуйте инструкциям для авторизации)"
 echo ""
-echo "2. Добавьте сессию в /var/www/sointera-bot/.env.local"
+echo "3. Добавьте сессию в .env.local"
 echo ""
-echo "3. Запустите сервис:"
+echo "4. Запустите сервис:"
 echo "   systemctl start sointera-bot"
 echo "   systemctl enable sointera-bot"
 echo ""
-echo "4. Проверьте статус:"
+echo "5. Проверьте статус:"
 echo "   systemctl status sointera-bot"
 echo ""
-echo "5. Смотрите логи:"
+echo "6. Смотрите логи:"
 echo "   less /var/www/sointera-bot/logs/app-*.log"
 echo "   journalctl -u sointera-bot -f"
 echo ""
