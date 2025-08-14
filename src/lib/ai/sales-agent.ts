@@ -2,13 +2,20 @@ import OpenAI from 'openai';
 import { PrismaClient } from '@prisma/client';
 import * as dotenv from 'dotenv';
 import path from 'path';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 // Загружаем переменные окружения из .env.local
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
+// Настройка прокси если указан
+const httpAgent = process.env.HTTPS_PROXY
+  ? new HttpsProxyAgent(process.env.HTTPS_PROXY)
+  : undefined;
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  httpAgent: httpAgent as any,
 });
 
 const prisma = new PrismaClient();
