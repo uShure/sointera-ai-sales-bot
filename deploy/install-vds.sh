@@ -39,9 +39,9 @@ mkdir -p /var/log/sointera-bot
 chown -R www-data:www-data /var/www/sointera-bot
 chown -R www-data:www-data /var/log/sointera-bot
 
-# Копируем файлы проекта
+# Копируем файлы проекта (включая скрытые файлы)
 echo "📋 Копирование файлов проекта..."
-cp -r ./* /var/www/sointera-bot/
+cp -r . /var/www/sointera-bot/
 cd /var/www/sointera-bot
 
 # Создаём базовый .env файл для установки
@@ -59,8 +59,34 @@ sudo -u www-data bun run seed
 
 # Создаём .env.local из примера если его нет
 if [ ! -f "/var/www/sointera-bot/.env.local" ]; then
-    echo "📝 Создание .env.local из примера..."
-    cp /var/www/sointera-bot/.env.example /var/www/sointera-bot/.env.local
+    echo "📝 Создание .env.local..."
+
+    # Если .env.example существует, копируем его
+    if [ -f "/var/www/sointera-bot/.env.example" ]; then
+        cp /var/www/sointera-bot/.env.example /var/www/sointera-bot/.env.local
+    else
+        # Иначе создаём базовый файл
+        cat > /var/www/sointera-bot/.env.local << 'EOF'
+# Database
+DATABASE_URL="file:./dev.db"
+
+# OpenAI API
+OPENAI_API_KEY=sk-proj-ваш_ключ_openai_здесь
+
+# Telegram API
+TELEGRAM_API_ID=23238977
+TELEGRAM_API_HASH=48bc98627708f323292cdfed426cb760
+
+# Telegram Session (получите при первом запуске)
+TELEGRAM_SESSION_STRING=
+
+# Менеджер для передачи сложных вопросов
+MANAGER_USERNAME=natalylini
+
+# Для работы на VDS сервере
+HEADLESS=true
+EOF
+    fi
 
     echo ""
     echo "⚠️  ВАЖНО: Отредактируйте файл /var/www/sointera-bot/.env.local"
@@ -70,6 +96,9 @@ if [ ! -f "/var/www/sointera-bot/.env.local" ]; then
     echo "  nano /var/www/sointera-bot/.env.local"
     echo ""
 fi
+
+# Устанавливаем права доступа
+chown -R www-data:www-data /var/www/sointera-bot
 
 # Устанавливаем systemd сервис
 echo "⚙️ Установка systemd сервиса..."
